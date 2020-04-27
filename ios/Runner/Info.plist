@@ -12,8 +12,8 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>triviabank</string>
-    <key>CFBundleDisplayName</key>
-    <string>Trivia Bank</string>
+	<key>CFBundleDisplayName</key>
+	<string>Trivia Bank</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -40,6 +40,10 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>

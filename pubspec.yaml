@@ -1,0 +1,68 @@
+name: triviabank
+description: A new Flutter project.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.6.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  chopper: ^3.0.2
+  #built_value: ^7.1.0
+
+  equatable: ^1.1.1
+
+  flutter_bloc: ^4.0.0
+
+  #flutter_svg:
+
+  intl:
+  intl_translation:
+
+  json_annotation: ^3.0.1
+  json_serializable: ^3.3.0
+
+  moor: 2.4.0
+  #moor_ffi: ^0.4.0
+  encrypted_moor:
+    git:
+      url: https://github.com/simolus3/moor.git
+      path: extras/encryption
+
+  observable: ^0.22.2
+
+  path:
+  path_provider: ^1.6.7
+
+  rxdart: ^0.24.0
+
+  shared_preferences: ^0.5.7
+
+  sqflite_sqlcipher:
+
+  cupertino_icons: ^0.1.2
+
+dependency_overrides:
+  sqflite:
+    git:
+      url: https://www.github.com/davidmartos96/sqflite_sqlcipher.git
+      path: sqflite
+      ref: fmdb_override
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^1.9.0
+  chopper_generator: ^3.0.4
+  intl_translation:
+  json_serializable: ^3.3.0
+  moor_generator: ^2.4.0
+
+flutter:
+
+  uses-material-design: true

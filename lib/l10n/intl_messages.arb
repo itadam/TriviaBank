@@ -1,0 +1,102 @@
+{
+  "@@last_modified": "2020-04-27T08:04:50.190581",
+  "Trivia Bank": "Trivia Bank",
+  "@Trivia Bank": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Email Address": "Email Address",
+  "@Email Address": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "you@example.com": "you@example.com",
+  "@you@example.com": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Password": "Password",
+  "@Password": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Login": "Login",
+  "@Login": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Logout": "Logout",
+  "@Logout": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Back": "Back",
+  "@Back": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Next": "Next",
+  "@Next": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "OK": "OK",
+  "@OK": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Yes!": "Yes!",
+  "@Yes!": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Cancel": "Cancel",
+  "@Cancel": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Add more": "Add more",
+  "@Add more": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Want to add more to your balance? Answer questions correctly to earn more.": "Want to add more to your balance? Answer questions correctly to earn more.",
+  "@Want to add more to your balance? Answer questions correctly to earn more.": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Error occured retrieving balance.": "Error occured retrieving balance.",
+  "@Error occured retrieving balance.": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Trivia Time": "Trivia Time",
+  "@Trivia Time": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "youHaveNumberOfQuestions": "You have {numberOfQuestions} questions below",
+  "@youHaveNumberOfQuestions": {
+    "type": "text",
+    "placeholders": {
+      "numberOfQuestions": {}
+    }
+  },
+  "currentBalanceStringFormat": "Current balance is: {balance}",
+  "@currentBalanceStringFormat": {
+    "type": "text",
+    "placeholders": {
+      "balance": {}
+    }
+  },
+  "Try to earn More": "Try to earn More",
+  "@Try to earn More": {
+    "type": "text",
+    "placeholders": {}
+  },
+  "Welcome": "Welcome",
+  "@Welcome": {
+    "type": "text",
+    "placeholders": {}
+  }
+}

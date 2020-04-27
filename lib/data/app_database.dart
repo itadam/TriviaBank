@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:triviabank/util/app_config.dart';
 import 'package:encrypted_moor/encrypted_moor.dart';
 import 'package:moor/moor.dart';
-import 'package:moor/moor_web.dart';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;

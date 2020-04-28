@@ -20,6 +20,23 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
   void _letUserKnowIfIncorrect(TriviaQuestionEntry questionEntry, String newValueSelected) {
 
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+
+        final correctAnswer = newValueSelected == questionEntry.correct_answer;
+
+        return AlertDialog(
+          title: new Text(correctAnswer ? AmLocalizations.of(context).correct : AmLocalizations.of(context).incorrect),
+          content: new Text(correctAnswer ? AmLocalizations.of(context).answerCorrect : AmLocalizations.of(context).answerIncorrect),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text(AmLocalizations.of(context).ok),
+              onPressed: () async => await Navigator.of(context, rootNavigator: true).pop('dialog'),
+            ),
+          ],
+        );
+    });
   }
 
   @override
@@ -34,7 +51,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
             new Positioned(
               child: new Align(
                 alignment: FractionalOffset.topCenter,
-                child: Text('You have ${widget.triviaQuestionEntryList.length} questions to answer', style: TextStyle(color: Colors.white),),
+                child: Text(AmLocalizations.of(context).youHaveNumberOfQuestions(widget.triviaQuestionEntryList.length), style: TextStyle(color: Colors.white),),
               )
             ),
             new Positioned(

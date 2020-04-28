@@ -1,5 +1,4 @@
 
-import 'package:triviabank/bloc/authorization_bloc.dart';
 import 'package:triviabank/data/app_database.dart';
 
 class TriviaScreenBloc {

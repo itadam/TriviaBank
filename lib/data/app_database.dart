@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:triviabank/constants.dart';
 import 'package:triviabank/util/app_config.dart';
 import 'package:encrypted_moor/encrypted_moor.dart';
 import 'package:moor/moor.dart';
@@ -42,6 +44,11 @@ class BankTransactionDao extends DatabaseAccessor<AppDatabase> with _$BankTransa
   Future insertTransaction(BankTransaction t) => into(bankTransactions).insert(t);
   Future updateTransaction(BankTransaction t) => update(bankTransactions).replace(t);
   Future deleteTransaction(BankTransaction t) => delete(bankTransactions).delete(t);
+  num computerUserBalance(int userId) {
+    num result = 0;
+    select(bankTransactions)..where((tbl) => tbl.userId.equals(userId))..get()..map((t) => result += t.amount);
+    return result;
+  }
 }
 
 @UseDao(tables: [Users])
@@ -52,24 +59,15 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
 
   Future<List<User>> getAllUsers() => select(users).get();
   Future<User> findUser(String emailAddress) => (select(users)..where((u) => u.emailAddress.collate(Collate.noCase).equals(emailAddress))).getSingle();
-  Future insertUser(User t) => into(users).insert(t, mode: InsertMode.insertOrIgnore);
+  Future insertUser(User t) => into(users).insert(t, mode: InsertMode.insertOrReplace);
   Future updateUser(User t) => update(users).replace(t);
   Future deleteUser(User t) => delete(users).delete(t);
-
 }
 
 @UseMoor(tables: [BankTransactions, Users], daos: [BankTransactionDao, UserDao])
 class AppDatabase extends _$AppDatabase {
 
-  static EncryptedExecutor _getEncryptedConnection() {
-    var dbConn = EncryptedExecutor.inDatabaseFolder(
-      path: 'am.sqlite',
-      password: AppConfig.getInstance.dbPassword,
-    );
-    return dbConn;
-  }
-
-  AppDatabase() : super(_getEncryptedConnection());
+  AppDatabase() : super(EncryptedExecutor.inDatabaseFolder(path: 'am.sqlite', password: dbPassword, logStatements: kDebugMode));
 
   @override
   int get schemaVersion => 1;

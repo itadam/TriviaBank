@@ -26,13 +26,17 @@ class AmLocalizations {
     return Localizations.of<AmLocalizations>(context, AmLocalizations);
   }
 
-  String get appTitle => intl.Intl.message('Trivia Bank');
+  String get appTitle => intl.Intl.message(appTitle);
 
   String get emailAddress => intl.Intl.message('Email Address');
 
   String get emailAddressHint => intl.Intl.message('you@example.com');
 
+  String get emailAddressIsInvalid => intl.Intl.message('Email Address is invalid.');
+
   String get password => intl.Intl.message('Password');
+
+  String get passwordDoesNotMeetRequirements => intl.Intl.message('Password does not meet requirements.');
 
   String get login => intl.Intl.message('Login');
 
@@ -56,9 +60,17 @@ class AmLocalizations {
 
   String get triviaTime => intl.Intl.message('Trivia Time');
 
-  //String youHaveNumberOfQuestions(int numberOfQuestions) => intl.Intl.message("You have $numberOfQuestions questions below", args: [numberOfQuestions], name: 'youHaveNumberOfQuestions');
+  String get correct => intl.Intl.message('Correct');
 
-  //String currentBalanceStringFormat(String balance) => intl.Intl.message("Current balance is: $balance", args: [balance], name: 'currentBalanceStringFormat');
+  String get answerCorrect => intl.Intl.message('Answer was correct.');
+
+  String get incorrect => intl.Intl.message('Incorrect');
+
+  String get answerIncorrect => intl.Intl.message('Answer was incorrect.');
+
+  String youHaveNumberOfQuestions(int numberOfQuestions) => intl.Intl.message("You have $numberOfQuestions questions below", args: [numberOfQuestions], name: 'youHaveNumberOfQuestions');
+
+  String currentBalanceStringFormat(String balance) => intl.Intl.message("Current balance is: $balance", args: [balance], name: 'currentBalanceStringFormat');
 
   String get tryToEarnMore => intl.Intl.message('Try to earn More');
 

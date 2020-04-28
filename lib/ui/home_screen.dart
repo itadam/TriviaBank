@@ -1,9 +1,23 @@
 
+import 'dart:convert';
+
+import 'package:chopper/chopper.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:triviabank/bloc/authorization_bloc.dart';
-import 'package:triviabank/bloc/home_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:triviabank/bloc/authentication/authentication_bloc.dart';
+import 'package:triviabank/bloc/authentication/authentication_event.dart';
+import 'package:triviabank/bloc/home/home_bloc.dart';
+import 'package:triviabank/bloc/home/home_event.dart';
+import 'package:triviabank/bloc/home/home_state.dart';
+import 'package:triviabank/bloc/home/home_status.dart';
+import 'package:triviabank/bloc/login/login_bloc.dart';
+
 import 'package:triviabank/data/app_database.dart';
-import 'package:triviabank/net/trivia_api_client.dart';
+import 'package:triviabank/data/model/trivia_question_entry.dart';
+import 'package:triviabank/net/trivia_api_service.dart';
+
 import 'package:triviabank/ui/trivia_screen.dart';
 import 'package:triviabank/util/am_localizations.dart';
 import 'package:flutter/material.dart';
@@ -16,124 +30,102 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
 
-  HomeBloc bloc = HomeBloc();
-
-  bool _busy = false;
-
-  num _balance = 0;
 
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
       appBar: AppBar(title: Text(AmLocalizations.of(context).welcome),),
-      body: Container(
-        height: double.maxFinite,
-        child: new Stack(
-          children: <Widget>[
-            new Positioned(
-              child: new Align(
-                alignment: FractionalOffset.topCenter,
-                child: FutureBuilder<List<BankTransaction>>(
-                  future: bloc.transactionDao.getAllBankTransactionsByUser(authBloc.user.id),
-                  builder: (context, snapshot) {
+      body: BlocBuilder<HomeBloc, HomeState>(
 
-                    var resultText = AmLocalizations.of(context).errorRetrievingBalance;
-                    var ovalColor = Colors.red;
-
-                    if (snapshot.hasData) {
-
-                      var totalCents = _computeTotalSends(snapshot.data);
-                      //resultText = AmLocalizations.of(context).currentBalanceStringFormat(NumberFormat.simpleCurrency().format(totalCents / 100));
-                      resultText = 'Your current balance is ${NumberFormat.simpleCurrency().format(totalCents / 100)}';
-                      ovalColor = _balanceColor(totalCents);
-
-                      setState(() {
-                        _balance = totalCents;
-                      });
-
-                    } else if (!snapshot.hasError) {
-                      //resultText = AmLocalizations.of(context).currentBalanceStringFormat(0);
-                    }
-
-                    return ClipOval(
-                      child: Container(
-                        color: ovalColor,
-                        height: 120.0, // height of the button
-                        width: 120.0, // width of the button
-                        child: Center(child: Text(resultText, style: TextStyle(color: Colors.white),)),
-                      ),
-                    );
-                  },
-                )
-              )
-            ),
-            Visibility(
-              visible: _busy,
-              child: CircularProgressIndicator()
-            ),
-            new Positioned(
-              child: new Align(
-                alignment: FractionalOffset.center,
-                child: GestureDetector(
-                  onTap: () => showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-
-                      return AlertDialog(
-                        title: new Text(AmLocalizations.of(context).addMore),
-                        content: new Text(AmLocalizations.of(context).addMoreToBalance),
-                        actions: <Widget>[
-                          new FlatButton(
-                            child: new Text(AmLocalizations.of(context).yesWithExclamation),
-                            onPressed: () async {
-
-                              setState(() {
-                                _busy = true;
-                              });
-
-                              var userDifficultyLevel = _userLevelOfDifficulty(_balance);
-                              var triviaQuestions = await TriviaApiClient.getInstance.getQuestions(difficulty: userDifficultyLevel, amount: 5, category: 9);
-
-                              setState(() {
-                                _busy = false;
-                              });
-
-                              await Navigator.push(context, MaterialPageRoute(builder: (context) => TriviaScreen(triviaQuestionEntryList: null)));
-                            },
-                          ),
-                          new FlatButton(
-                            child: new Text(AmLocalizations.of(context).cancel),
-                            onPressed: () async => Navigator.of(context).pop(),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  child: ClipOval(
-                    child: Container(
-                      color: Colors.blue,
-                      height: 120.0, // height of the button
-                      width: 120.0, // width of the button
-                      child: Center(child: Text(AmLocalizations.of(context).tryToEarnMore, style: TextStyle(color: Colors.white),)),
-                    ),
-                  ),
-                ),
-              )
-            ),
-            new Positioned(
-              child: new Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: RaisedButton(
-                  onPressed: bloc.logoutUser,
-                  child: Text(AmLocalizations.of(context).logout, style: TextStyle(color: Colors.white),),
-                  color: Colors.blue,
-                ),
+        builder: (context, state) => Container(
+          height: double.maxFinite,
+          child: new Stack(
+            children: <Widget>[
+              new Positioned(
+                  child: new Align(
+                      alignment: FractionalOffset.topCenter,
+                      child: FutureProvider<List<BankTransaction>>( // TODO: refactor this
+                        create: (BuildContext context) async =>
+                                          await BlocProvider.of<HomeBloc>(context).bankTransactionDao.getAllBankTransactionsByUser(BlocProvider.of<LoginBloc>(context).user.id),
+                        child: Consumer<List<BankTransaction>>(
+                          builder: (context, lstValue, child) => ClipOval(
+                              child: Container(
+                              color: _balanceColor(_computeTotalCents(lstValue)),
+                              height: 120.0, // height of the button
+                              width: 120.0, // width of the button
+                              child: Center(child: Text(AmLocalizations.of(context).currentBalanceStringFormat(NumberFormat.simpleCurrency().format(_computeTotalCents(lstValue) / 100)), style: TextStyle(color: Colors.white), textAlign: TextAlign.center,)),
+                            ),
+                          )
+                        ),
+                      )
+                  )
               ),
-            )
-          ],
+              Visibility(
+                  visible: state.homeStatus == HomeStatus.Loading || state.homeStatus == HomeStatus.FetchingData,
+                  child: CircularProgressIndicator()
+              ),
+              new Positioned(
+                  child: new Align(
+                    alignment: FractionalOffset.center,
+                    child: GestureDetector(
+                      onTap: () => showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+
+                          return AlertDialog(
+                            title: new Text(AmLocalizations.of(context).addMore),
+                            content: new Text(AmLocalizations.of(context).addMoreToBalance),
+                            actions: <Widget>[
+                              new FlatButton(
+                                child: new Text(AmLocalizations.of(context).yesWithExclamation),
+                                onPressed: () => FutureBuilder(
+                                  future: BlocProvider.of<HomeBloc>(context).getApiService<TriviaApiService>().getQuestions(difficulty: 'easy', amount: 5, category: 9),
+                                  builder: (buildContext, snapshot) {
+
+                                    if (snapshot.hasData) {
+                                      List genericList = json.decode(snapshot.data);
+                                      var questionList = genericList.map((e) => TriviaQuestionEntry.fromJson(e));
+                                      Navigator.push(buildContext, MaterialPageRoute(builder: (context) => TriviaScreen(triviaQuestionEntryList: questionList)));
+                                    }
+
+                                    return ;
+                                  },
+                                )
+                              ),
+                              new FlatButton(
+                                child: new Text(AmLocalizations.of(context).cancel),
+                                onPressed: () async => Navigator.of(context).pop(),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      child: ClipOval(
+                        child: Container(
+                          color: Colors.blue,
+                          height: 120.0, // height of the button
+                          width: 120.0, // width of the button
+                          child: Center(child: Text(AmLocalizations.of(context).tryToEarnMore, style: TextStyle(color: Colors.white),)),
+                        ),
+                      ),
+                    ),
+                  )
+              ),
+              new Positioned(
+                child: new Align(
+                  alignment: FractionalOffset.bottomCenter,
+                  child: RaisedButton(
+                    onPressed: () => BlocProvider.of<AuthenticationBloc>(context).add(LoggedOut()),
+                    child: Text(AmLocalizations.of(context).logout, style: TextStyle(color: Colors.white),),
+                    color: Colors.blue,
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
-      ),
+      )
     );
   }
 
@@ -155,7 +147,7 @@ class HomeScreenState extends State<HomeScreen> {
     return Colors.red;
   }
 
-  static num _computeTotalSends(List<BankTransaction> bankTransactions) {
+  static num _computeTotalCents(List<BankTransaction> bankTransactions) {
     num result = 0;
     bankTransactions.forEach((t) => result += t.amount);
     return result;

@@ -61,10 +61,9 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
 @UseMoor(tables: [BankTransactions, Users], daos: [BankTransactionDao, UserDao])
 class AppDatabase extends _$AppDatabase {
 
-  static _getEncryptedConnection() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
+  static EncryptedExecutor _getEncryptedConnection() {
     var dbConn = EncryptedExecutor.inDatabaseFolder(
-      path: p.join(dbFolder.path, 'am.sqlite'),
+      path: 'am.sqlite',
       password: AppConfig.getInstance.dbPassword,
     );
     return dbConn;

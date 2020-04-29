@@ -6,6 +6,7 @@ import 'package:triviabank/bloc/authentication/authentication_state.dart';
 import 'package:triviabank/constants.dart';
 import 'package:triviabank/data/app_database.dart';
 import 'package:triviabank/data/model/trivia_question_entry.dart';
+import 'package:triviabank/data/user_repository.dart';
 import 'package:triviabank/net/trivia_api_service.dart';
 import 'package:triviabank/util/app_config.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -54,18 +55,19 @@ class BankMobileApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+      home: Provider<UserRepository>(
 
-        builder: (context, state) {
-          if (state is AuthenticationUninitialized || state is AuthenticationLoading) {
-            return Center(child: CircularProgressIndicator(),);
-          }
-          if (state is AuthenticationAuthenticated) {
-            return HomeScreen();
-          }
-          return LoginScreen();
-        },
-      ),
+        create: (context) => UserRepository(Provider.of<AppDatabase>(context, listen: false).userDao),
+
+        child: BlocProvider<AuthenticationBloc>(
+
+          create: (context) => AuthenticationBloc(userRepository: Provider.of<UserRepository>(context, listen: false)),
+
+          child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+            builder: (context, authState) => (authState is AuthenticationAuthenticated) ? HomeScreen() : LoginScreen(),
+          )
+        ),
+      )
     );
   }
 }

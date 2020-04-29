@@ -20,8 +20,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({
     @required this.userRepository,
     @required this.authenticationBloc
-  })  : assert(userRepository != null),
-        assert(authenticationBloc != null);
+  })  : assert(userRepository != null, 'Provided UserRepository is invalid, and must not be null.'),
+        assert(authenticationBloc != null, 'Provided AuthenticationBloc is invalid, and must not be null.'),
+        super();
 
   LoginState get initialState => LoginState(loginStatus: LoginStatus.initial);
 
@@ -40,6 +41,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   @override
   Stream<LoginState> mapEventToState(LoginEvent event) async* {
+
+    if (event is LoginInitialized) {
+      yield LoginState(loginStatus: LoginStatus.initial, error: null, isEmailValid: false, isPasswordValid: false);
+    }
     if (event is EmailChanged) {
       yield state.mergeWith(isEmailValid: _isValidEmail(event.email));
     }

@@ -5,7 +5,7 @@ import 'login_status.dart';
 
 class LoginState extends Equatable {
 
-  const LoginState({@required this.loginStatus, this.error, this.isEmailValid = false, this.isPasswordValid = false});
+  const LoginState({this.loginStatus = LoginStatus.initial, this.error, this.isEmailValid = false, this.isPasswordValid = false});
 
   final LoginStatus loginStatus;
   final String error;

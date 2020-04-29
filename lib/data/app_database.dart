@@ -69,6 +69,8 @@ class AppDatabase extends _$AppDatabase {
 
   AppDatabase() : super(EncryptedExecutor.inDatabaseFolder(path: 'am.sqlite', password: dbPassword, logStatements: kDebugMode));
 
+  AppDatabase.connect(DatabaseConnection connection) : super.connect(connection);
+
   @override
   int get schemaVersion => 1;
 

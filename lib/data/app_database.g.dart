@@ -454,6 +454,7 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
 
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+  _$AppDatabase.connect(DatabaseConnection c) : super.connect(c);
   $BankTransactionsTable _bankTransactions;
   $BankTransactionsTable get bankTransactions =>
       _bankTransactions ??= $BankTransactionsTable(this);

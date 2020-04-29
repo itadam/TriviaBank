@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:chopper/chopper.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:triviabank/bloc/home/home_event.dart';
 import 'package:triviabank/bloc/home/home_state.dart';
@@ -16,13 +17,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final BankTransactionDao bankTransactionDao;
   final ChopperClient _chopperClient;
 
-  HomeBloc(this.appConfig, this.bankTransactionDao) :
+  HomeBloc({
+    @required this.appConfig,
+    @required this.bankTransactionDao}
+    ) :
+        assert(appConfig != null, 'Provided app config is invalid'),
+        assert(bankTransactionDao != null, 'Provided BankTransactionao DAO is invalid'),
         _chopperClient = ChopperClient(
-          baseUrl: appConfig.triviaApiUrl,
+          baseUrl: appConfig?.triviaApiUrl,
           services: [
             TriviaApiService.create()
           ],
-        )
+        ),
+        super()
     ;
 
   @override

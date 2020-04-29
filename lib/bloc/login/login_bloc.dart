@@ -30,12 +30,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   User get user => _user;
 
-  static bool _isValidEmail(String str) {
+  static bool isValidEmail(String str) {
     final emailRegExp = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
     return emailRegExp.hasMatch(str);
   }
 
-  static bool _isPasswordValid(String str) {
+  static bool isPasswordValid(String str) {
     return !(str == null || str.isEmpty);
   }
 
@@ -46,10 +46,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       yield LoginState(loginStatus: LoginStatus.initial, error: null, isEmailValid: false, isPasswordValid: false);
     }
     if (event is EmailChanged) {
-      yield state.mergeWith(isEmailValid: _isValidEmail(event.email));
+      yield state.mergeWith(isEmailValid: isValidEmail(event.email));
     }
     if (event is PasswordChanged) {
-      yield state.mergeWith(isPasswordValid: _isPasswordValid(event.password),);
+      yield state.mergeWith(isPasswordValid: isPasswordValid(event.password),);
     }
     if (event is LoginButtonPressed) {
       yield state.mergeWith(loginStatus: LoginStatus.loading);

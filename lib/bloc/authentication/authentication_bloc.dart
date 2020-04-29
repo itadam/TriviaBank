@@ -1,4 +1,5 @@
 
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:triviabank/bloc/authentication/authentication_event.dart';
 import 'package:triviabank/bloc/authentication/authentication_state.dart';
@@ -9,7 +10,8 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
   final UserRepository userRepository;
 
-  AuthenticationBloc(this.userRepository);
+  AuthenticationBloc({@required this.userRepository})
+      : assert(userRepository != null, 'Provided UserRepository is invalid, and must not be null.'), super();
 
   @override
   AuthenticationState get initialState => AuthenticationUninitialized();

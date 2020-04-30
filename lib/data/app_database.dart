@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:json_annotation/json_annotation.dart' as j;
 import 'package:triviabank/constants.dart';
 import 'package:triviabank/util/app_config.dart';
 import 'package:encrypted_moor/encrypted_moor.dart';
@@ -9,6 +11,7 @@ import 'package:moor/moor.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:triviabank/util/string_list_json_converter.dart';
 
 part 'app_database.g.dart';
 
@@ -20,9 +23,45 @@ class BankTransactions extends Table {
 
   TextColumn get description => text().nullable()();
 
-  DateTimeColumn get createdDt => dateTime()();
+  DateTimeColumn get createdDt => dateTime().withDefault(Constant(DateTime.now()))();
 
   IntColumn get amount => integer().withDefault(Constant(0))();
+
+}
+
+@j.JsonSerializable()
+class TriviaQuestions extends Table {
+
+  @j.JsonKey(ignore: true)
+  IntColumn get id => integer().autoIncrement()();
+
+  @j.JsonKey(ignore: true)
+  IntColumn get userId => integer()(); // TODO: future versions should define a foreign key to the Users primary key
+
+  @j.JsonKey(ignore: true)
+  DateTimeColumn get createdDt => dateTime().withDefault(Constant(DateTime.now()))();
+
+  // Count the number of times the question has been answered correctly by the user.
+  @j.JsonKey(ignore: true)
+  IntColumn get correctlyAnswered => integer().withDefault(Constant(0))();
+
+  @j.JsonKey(name: 'category')
+  TextColumn get category => text().nullable()();
+
+  @j.JsonKey(name: 'difficulty')
+  TextColumn get difficulty => text().nullable()();
+
+  @j.JsonKey(name: 'type')
+  TextColumn get type => text().nullable()();
+
+  @j.JsonKey(name: 'question')
+  TextColumn get question => text().nullable()();
+
+  @j.JsonKey(name: 'correct_answer')
+  TextColumn get correctAnswer => text().nullable()();
+
+  @j.JsonKey(name: 'incorrect_answers')
+  TextColumn get incorrectAnswers => text().map(const StringListJsonConverter()).nullable()();
 
 }
 
@@ -51,6 +90,17 @@ class BankTransactionDao extends DatabaseAccessor<AppDatabase> with _$BankTransa
   }
 }
 
+@UseDao(tables: [TriviaQuestions])
+class TriviaQuestionDao extends DatabaseAccessor<AppDatabase> with _$TriviaQuestionDaoMixin {
+
+  final AppDatabase db;
+  TriviaQuestionDao(this.db) : super(db);
+
+  Future insertTriviaQuestion(TriviaQuestion t) => into(triviaQuestions).insert(t, mode: InsertMode.insertOrReplace);
+  Future<TriviaQuestion> findExistingQuestion(int userId, String question) => (select(triviaQuestions)..where((q) => q.userId.equals(userId) & q.question.collate(Collate.noCase).equals(question))).getSingle();
+
+}
+
 @UseDao(tables: [Users])
 class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
 
@@ -64,7 +114,7 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
   Future deleteUser(User t) => delete(users).delete(t);
 }
 
-@UseMoor(tables: [BankTransactions, Users], daos: [BankTransactionDao, UserDao])
+@UseMoor(tables: [BankTransactions, TriviaQuestions, Users], daos: [BankTransactionDao, TriviaQuestionDao, UserDao])
 class AppDatabase extends _$AppDatabase {
 
   AppDatabase() : super(EncryptedExecutor.inDatabaseFolder(path: 'am.sqlite', password: dbPassword, logStatements: kDebugMode));

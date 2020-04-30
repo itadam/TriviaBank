@@ -5,7 +5,6 @@ import 'package:triviabank/bloc/authentication/authentication_bloc.dart';
 import 'package:triviabank/bloc/authentication/authentication_state.dart';
 import 'package:triviabank/constants.dart';
 import 'package:triviabank/data/app_database.dart';
-import 'package:triviabank/data/model/trivia_question_entry.dart';
 import 'package:triviabank/data/user_repository.dart';
 import 'package:triviabank/net/trivia_api_service.dart';
 import 'package:triviabank/util/app_config.dart';

@@ -1,16 +1,20 @@
 
 import 'dart:math';
 
-import 'package:triviabank/data/model/trivia_question_entry.dart';
 import 'package:flutter/material.dart';
+import 'package:triviabank/data/app_database.dart';
 
 class TriviaQuestionCard extends StatelessWidget {
 
-  TriviaQuestionCard({this.triviaQuestionEntry, this.onValueSelected});
+  TriviaQuestionCard({@required this.triviaQuestion, this.onValueSelected}) :
+      assert(triviaQuestion != null, 'TriviaQuestion data was not provided or is invalid.'),
+      super()
+  ;
 
-  final TriviaQuestionEntry triviaQuestionEntry;
+  final TriviaQuestion triviaQuestion;
 
-  final Function(TriviaQuestionEntry questionEntry, String newValueSelected) onValueSelected;
+  // Callback, called when a Question is answered.
+  final Function(TriviaQuestion question, String newValueSelected) onValueSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -19,8 +23,8 @@ class TriviaQuestionCard extends StatelessWidget {
 
     final _randomGroupValue = 'question-${Random().nextInt(1000)}';
 
-    var answerList = List.from(triviaQuestionEntry.incorrect_answers, growable: true);
-    answerList.add(triviaQuestionEntry.correct_answer);
+    var answerList = List.from(triviaQuestion.incorrectAnswers, growable: true);
+    answerList.add(triviaQuestion.correctAnswer);
     answerList.shuffle();
 
     return Column(
@@ -46,7 +50,7 @@ class TriviaQuestionCard extends StatelessWidget {
           ),
           child: Padding(
             padding: EdgeInsets.only(right: 48.0),
-            child: Text(triviaQuestionEntry.question),
+            child: Text(triviaQuestion.question),
           ),
         ),
         for (String answerEntry in answerList)
@@ -75,7 +79,7 @@ class TriviaQuestionCard extends StatelessWidget {
                 title: Text(answerEntry),
                 value: answerEntry.toLowerCase(),
                 groupValue: _randomGroupValue,
-                onChanged: (String value) => onValueSelected(triviaQuestionEntry, value),
+                onChanged: (String value) => onValueSelected == null ? null : onValueSelected(triviaQuestion, value),
               ),
             ),
           )

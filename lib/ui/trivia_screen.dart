@@ -1,16 +1,18 @@
 
 import 'dart:math';
 
-import 'package:triviabank/data/model/trivia_question_entry.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:triviabank/bloc/trivia_screen/trivia_screen_bloc.dart';
+import 'package:triviabank/bloc/trivia_screen/trivia_screen_state.dart';
+import 'package:triviabank/data/app_database.dart';
 import 'package:triviabank/ui/trivia_question_card.dart';
 import 'package:triviabank/util/am_localizations.dart';
 import 'package:flutter/material.dart';
 
 class TriviaScreen extends StatefulWidget {
 
-  final List<TriviaQuestionEntry> triviaQuestionEntryList;
-
-  TriviaScreen({Key key, this.triviaQuestionEntryList}) : super(key: key);
+  TriviaScreen({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TriviaScreenState();
@@ -18,13 +20,13 @@ class TriviaScreen extends StatefulWidget {
 
 class _TriviaScreenState extends State<TriviaScreen> {
 
-  void _letUserKnowIfIncorrect(TriviaQuestionEntry questionEntry, String newValueSelected) {
+  void _letUserKnowIfIncorrect(TriviaQuestion question, String newValueSelected) {
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
 
-        final correctAnswer = newValueSelected == questionEntry.correct_answer;
+        final correctAnswer = newValueSelected == question.correctAnswer;
 
         return AlertDialog(
           title: new Text(correctAnswer ? AmLocalizations.of(context).correct : AmLocalizations.of(context).incorrect),
@@ -32,7 +34,7 @@ class _TriviaScreenState extends State<TriviaScreen> {
           actions: <Widget>[
             new FlatButton(
               child: new Text(AmLocalizations.of(context).ok),
-              onPressed: () async => await Navigator.of(context, rootNavigator: true).pop('dialog'),
+              onPressed: () => Navigator.of(context, rootNavigator: true).pop('dialog'),
             ),
           ],
         );
@@ -44,48 +46,56 @@ class _TriviaScreenState extends State<TriviaScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(AmLocalizations.of(context).triviaTime,),),
-      body: Container(
-        height: double.maxFinite,
-        child: new Stack(
-          children: <Widget>[
-            new Positioned(
-              child: new Align(
-                alignment: FractionalOffset.topCenter,
-                child: Text(AmLocalizations.of(context).youHaveNumberOfQuestions(widget.triviaQuestionEntryList.length), style: TextStyle(color: Colors.white),),
-              )
-            ),
-            new Positioned(
-              child: new Align(
-                alignment: FractionalOffset.topCenter,
-                child: Column(
-                  children: <Widget>[
-                    for (TriviaQuestionEntry triviaQuestionEntry in widget.triviaQuestionEntryList)
-                      TriviaQuestionCard(triviaQuestionEntry: triviaQuestionEntry, onValueSelected: _letUserKnowIfIncorrect)
-                  ],
-                )
-              )
-            ),
-            new Positioned(
-              child: new Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: Row(
-                  children: <Widget>[
-                    RaisedButton(
-                      child: Text(AmLocalizations.of(context).back, style: TextStyle(color: Colors.white),),
-                      color: Colors.blue,
-                    ),
-                    RaisedButton(
-                      //onPressed: bloc.logoutUser,
-                      child: Text(AmLocalizations.of(context).next, style: TextStyle(color: Colors.white),),
-                      color: Colors.blue,
-                    )
-                  ],
-                ),
-              ),
-            )
-          ],
+      body: BlocBuilder<TriviaScreenBloc, TriviaScreenState>(
+
+        bloc: TriviaScreenBloc(
+          triviaQuestionDao: Provider.of<AppDatabase>(context).triviaQuestionDao,
+
         ),
-      ),
+
+        builder: (BuildContext context, state) => Container(
+          height: double.maxFinite,
+          child: new Stack(
+            children: <Widget>[
+              new Positioned(
+                child: new Align(
+                  alignment: FractionalOffset.topCenter,
+                  child: Text(AmLocalizations.of(context).youHaveNumberOfQuestions(state.triviaQuestionList?.length), style: TextStyle(color: Colors.white),),
+                )
+              ),
+              new Positioned(
+                child: new Align(
+                  alignment: FractionalOffset.topCenter,
+                  child: Column(
+                    children: <Widget>[
+                      for (TriviaQuestion triviaQuestionRecord in state.triviaQuestionList)
+                        TriviaQuestionCard(triviaQuestion: triviaQuestionRecord, onValueSelected: _letUserKnowIfIncorrect)
+                    ],
+                  )
+                )
+              ),
+              new Positioned(
+                child: new Align(
+                  alignment: FractionalOffset.bottomCenter,
+                  child: Row(
+                    children: <Widget>[
+                      RaisedButton(
+                        child: Text(AmLocalizations.of(context).back, style: TextStyle(color: Colors.white),),
+                        color: Colors.blue,
+                      ),
+                      RaisedButton(
+                        //onPressed: bloc.logoutUser,
+                        child: Text(AmLocalizations.of(context).next, style: TextStyle(color: Colors.white),),
+                        color: Colors.blue,
+                      )
+                    ],
+                  ),
+                ),
+              )
+            ],
+          )
+        )
+      )
     );
   }
 }

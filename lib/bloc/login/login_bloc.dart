@@ -46,13 +46,14 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       yield LoginState(loginStatus: LoginStatus.initial, error: null, isEmailValid: false, isPasswordValid: false);
     }
     if (event is EmailChanged) {
-      yield state.mergeWith(isEmailValid: isValidEmail(event.email));
+      yield state.mergeWith(loginStatus: LoginStatus.emailChanged, isEmailValid: isValidEmail(event.email));
     }
     if (event is PasswordChanged) {
-      yield state.mergeWith(isPasswordValid: isPasswordValid(event.password),);
+      yield state.mergeWith(loginStatus: LoginStatus.passwordChanged, isPasswordValid: isPasswordValid(event.password),);
     }
     if (event is LoginButtonPressed) {
-      yield state.mergeWith(loginStatus: LoginStatus.loading);
+
+      yield state.mergeWith(loginStatus: LoginStatus.authenticating);
 
       try {
 
@@ -62,7 +63,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         );
         _user = User.fromJson(jsonDecode(token));
         authenticationBloc.add(LoggedIn(token: token));
-        yield state.mergeWith(loginStatus: LoginStatus.initial);
+        yield state.mergeWith(loginStatus: LoginStatus.successful, isEmailValid: true, isPasswordValid: true);
       } catch (error) {
         _user = null;
         yield state.mergeWith(loginStatus: LoginStatus.failure, error: error.toString());

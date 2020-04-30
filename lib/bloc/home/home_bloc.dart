@@ -13,52 +13,25 @@ import 'package:triviabank/util/app_config.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
-  final AppConfig appConfig;
+  final User user;
   final BankTransactionDao bankTransactionDao;
-  final ChopperClient _chopperClient;
 
   HomeBloc({
-    @required this.appConfig,
-    @required this.bankTransactionDao}
-    ) :
-        assert(appConfig != null, 'Provided app config is invalid'),
+    @required this.user,
+    @required this.bankTransactionDao
+  }) :  assert(user != null, 'Provided User data is invalid.'),
         assert(bankTransactionDao != null, 'Provided BankTransactionao DAO is invalid'),
-        _chopperClient = ChopperClient(
-          baseUrl: appConfig?.triviaApiUrl,
-          services: [
-            TriviaApiService.create()
-          ],
-        ),
         super()
     ;
 
   @override
-  HomeState get initialState => HomeState(homeStatus: HomeStatus.Loading);
+  HomeState get initialState => HomeState();
 
-  @override
-  Future<void> close() {
-    _chopperClient.dispose();
-    return super.close();
-  }
-
-  T getApiService<T extends ChopperService>() => _chopperClient.getService<T>();
-
-  Stream<HomeState> _mapApiCall(HomeCallApiEvent event) async* {
-    yield state.mergeWith(homeStatus: HomeStatus.Loading);
-    try {
-      var apiSvc = _chopperClient.getService<TriviaApiService>();
-      event.onApiCall(apiSvc);
-      yield state.mergeWith(homeStatus: HomeStatus.Loaded);
-    } catch (error) {
-      yield state.mergeWith(homeStatus: HomeStatus.DataFailedToLoad);
-    }
-  }
-
-  Stream<HomeState> _mapDatabaseQueryEvent(HomeQueryDatabaseEvent event) async* {
+  Stream<HomeState> _mapDatabaseQueryEvent(HomeScreenLoadedEvent event) async* {
     yield state.mergeWith(homeStatus: HomeStatus.FetchingData);
     try {
-      event.onQuery(bankTransactionDao);
-      yield state.mergeWith(homeStatus: HomeStatus.DataLoaded);
+      var transactionList = await bankTransactionDao.getAllBankTransactionsByUser(user.id);
+      yield state.mergeWith(homeStatus: HomeStatus.DataLoaded, bankTransactionList: transactionList);
     } catch (error) {
       yield state.mergeWith(homeStatus: HomeStatus.DataFailedToLoad);
     }
@@ -67,9 +40,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   @override
   Stream<HomeState> mapEventToState(HomeEvent event) async* {
 
-    if (event is HomeCallApiEvent) {
-      yield* _mapApiCall(event);
-    } else if (event is HomeQueryDatabaseEvent) {
+    if (event is HomeScreenLoadedEvent) {
       yield* _mapDatabaseQueryEvent(event);
     }
   }

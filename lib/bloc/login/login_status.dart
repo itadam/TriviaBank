@@ -1,4 +1,4 @@
 
 enum LoginStatus {
-  initial, loading, failure, successful
+  initial, emailChanged, passwordChanged, authenticating, failure, successful
 }

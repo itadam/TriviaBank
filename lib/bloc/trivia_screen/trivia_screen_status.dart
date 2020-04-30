@@ -1,5 +1,5 @@
 
-enum HomeStatus {
+enum TriviaScreenStatus {
   Initialized,
   FetchingData,
   DataLoaded,

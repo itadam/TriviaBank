@@ -10,29 +10,13 @@ abstract class HomeEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class HomeQueryDatabaseEvent extends HomeEvent {
+class HomeScreenLoadedEvent extends HomeEvent {
 
-  final Function(BankTransactionDao bankTransactionDao) onQuery;
-
-  const HomeQueryDatabaseEvent({this.onQuery}) : super();
+  const HomeScreenLoadedEvent() : super();
 
   @override
-  List<Object> get props => [onQuery];
+  List<Object> get props => [];
 
   @override
-  String toString() => 'HomeQueryDatabaseEvent';
-}
-
-class HomeCallApiEvent extends HomeEvent {
-
-  final Function(TriviaApiService triviaApiService) onApiCall;
-
-  const HomeCallApiEvent({this.onApiCall}) : super();
-
-  @override
-  List<Object> get props => [onApiCall];
-
-  @override
-  String toString() => 'HomeCallApiEvent';
-
+  String toString() => 'HomeScreenLoadedEvent';
 }

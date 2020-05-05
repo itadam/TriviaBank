@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:triviabank/data/app_database.dart';
 
 abstract class AuthenticationState extends Equatable {
   @override
@@ -7,7 +8,15 @@ abstract class AuthenticationState extends Equatable {
 
 class AuthenticationUninitialized extends AuthenticationState {}
 
-class AuthenticationAuthenticated extends AuthenticationState {}
+class AuthenticationAuthenticated extends AuthenticationState {
+
+  final User user;
+
+  AuthenticationAuthenticated({this.user});
+
+  @override
+  List<Object> get props => [user];
+}
 
 class AuthenticationUnauthenticated extends AuthenticationState {}
 

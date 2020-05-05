@@ -1,8 +1,11 @@
 
+import 'package:encrypted_moor/encrypted_moor.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:triviabank/bloc/authentication/authentication_bloc.dart';
 import 'package:triviabank/bloc/authentication/authentication_state.dart';
+import 'package:triviabank/bloc/login/login_bloc.dart';
 import 'package:triviabank/constants.dart';
 import 'package:triviabank/data/app_database.dart';
 import 'package:triviabank/data/user_repository.dart';
@@ -27,8 +30,20 @@ void launchApp({String env}) {
   runApp(
       MultiProvider(
         providers: [
-          Provider<AppDatabase>(create: (context) => AppDatabase(), dispose: (context, db) => db?.close(),),
-          FutureProvider<AppConfig>(create: (context) async => await AppConfig.forEnvironment(env)),
+          FutureProvider<AppConfig>.value(value: AppConfig.forEnvironment(env),),
+          Provider<AppDatabase>(
+            create: (context) => AppDatabase(
+              queryExecutor: EncryptedExecutor.inDatabaseFolder(path: 'am.sqlite', password: dbPassword, logStatements: kDebugMode)
+            ),
+            lazy: false,
+            dispose: (context, db) => db?.close(),
+          ),
+          ProxyProvider<AppDatabase, UserDao>(
+            update: (context, db, previousUsrDao) => db.userDao,
+          ),
+          ProxyProvider<UserDao, UserRepository>(
+            update: (context, usrDao, previousUserRepository) => UserRepository(userDao: usrDao),
+          )
         ],
         child: BankMobileApp(),
       )
@@ -54,17 +69,16 @@ class BankMobileApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: Provider<UserRepository>(
-
-        create: (context) => UserRepository(Provider.of<AppDatabase>(context, listen: false).userDao),
-
-        child: BlocProvider<AuthenticationBloc>(
-
-          create: (context) => AuthenticationBloc(userRepository: Provider.of<UserRepository>(context, listen: false)),
-
-          child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
-            builder: (context, authState) => (authState is AuthenticationAuthenticated) ? HomeScreen() : LoginScreen(),
-          )
+      home: BlocProvider.value(
+        value: AuthenticationBloc(userRepository: Provider.of<UserRepository>(context, listen: false)),
+        child: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+          builder: (context, authState) =>
+              (authState is AuthenticationAuthenticated && authState.user != null)
+                  ?
+              HomeScreen(user: authState.user,)
+                  :
+              BlocProvider<LoginBloc>.value(value: LoginBloc(userRepository: Provider.of<UserRepository>(context, listen: false), authenticationBloc: BlocProvider.of<AuthenticationBloc>(context)), child: LoginScreen(),)
+              ,
         ),
       )
     );

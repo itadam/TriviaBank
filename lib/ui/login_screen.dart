@@ -25,44 +25,37 @@ class _LoginScreenState extends State<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  LoginBloc _loginBloc;
-
   @override
   void initState() {
     super.initState();
-    _loginBloc = LoginBloc(userRepository: Provider.of<UserRepository>(context, listen: false), authenticationBloc: BlocProvider.of<AuthenticationBloc>(context));
-    _loginBloc.listen((lState) {
-
-      if (lState.loginStatus == LoginStatus.successful) {
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-        );
-      } else if (lState.loginStatus == LoginStatus.failure) {
-
-        Scaffold.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${lState.error}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    });
   }
 
   @override
   void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
     super.dispose();
+  }
+
+  static void _respondToLoginState(BuildContext buildContext, LoginState lState) {
+
+    if (lState.loginStatus == LoginStatus.successful) {
+
+      Navigator.push(
+        buildContext,
+        MaterialPageRoute(builder: (context) => HomeScreen(user: lState.userResult,)),
+      );
+    } else if (lState.loginStatus == LoginStatus.failure) {
+
+      Scaffold.of(buildContext).showSnackBar(
+        SnackBar(
+          content: Text('${lState.error}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-
-    _usernameController.addListener(() => _loginBloc.add(EmailChanged(email: _usernameController.text)));
-    _passwordController.addListener(() => _loginBloc.add(PasswordChanged(password: _passwordController.text)));
 
     return Scaffold(
       appBar: AppBar(
@@ -70,50 +63,50 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: Container(
 
-        margin: EdgeInsets.all(20.0),
+          margin: EdgeInsets.all(20.0),
 
-        child: BlocBuilder<LoginBloc, LoginState>(
+          child: BlocConsumer<LoginBloc, LoginState>(
 
-          bloc: _loginBloc,
+            listener: (context, state) => _respondToLoginState(context, state),
 
-          builder: (context, state) => Form(
+            builder: (context, state) => Form(
 
-            child: Column(
+              child: Column(
 
-              children: [
-                TextFormField(
-                  keyboardType: TextInputType.emailAddress,
-                  controller: _usernameController,
-                  decoration: InputDecoration(
-                    labelText: AmLocalizations.of(context).emailAddress,
-                    hintText: AmLocalizations.of(context).emailAddressHint,
+                children: [
+                  Container(
+                    child: (state.loginStatus == LoginStatus.authenticating) ? CircularProgressIndicator() : null,
                   ),
-                  autovalidate: true,
-                  validator: (_) => state.loginStatus != LoginStatus.emailChanged || state.isEmailValid ? null : AmLocalizations.of(context).emailAddressIsInvalid,
-                ),
-                TextFormField(
-                  obscureText: true,
-                  controller: _passwordController,
-                  decoration: InputDecoration(
-                    labelText: AmLocalizations.of(context).password,
-                    hintText: AmLocalizations.of(context).password,
+                  TextFormField(
+                    keyboardType: TextInputType.emailAddress,
+                    controller: _usernameController,
+                    decoration: InputDecoration(
+                      labelText: AmLocalizations.of(context).emailAddress,
+                      hintText: AmLocalizations.of(context).emailAddressHint,
+                    ),
+                    autovalidate: true,
+                    validator: (_) => state.loginStatus != LoginStatus.emailChanged || LoginBloc.isValidEmail(_) ? null : AmLocalizations.of(context).emailAddressIsInvalid,
                   ),
-                  autovalidate: true,
-                  validator: (_) => state.loginStatus != LoginStatus.passwordChanged || state.isPasswordValid ? null : AmLocalizations.of(context).passwordDoesNotMeetRequirements,
-                ),
-                Container(margin: EdgeInsets.only(top: 25.0)),
-                RaisedButton(
-                  onPressed: () => (state.loginStatus != LoginStatus.authenticating) ? _loginBloc.add(LoginButtonPressed(username: _usernameController.text, password: _passwordController.text, ),) : null,
-                  child: Text(AmLocalizations.of(context).login, style: TextStyle(color: Colors.white),),
-                  color: Colors.blue,
-                ),
-                Container(
-                  child: (state.loginStatus == LoginStatus.authenticating) ? CircularProgressIndicator() : null,
-                )
-              ],
+                  TextFormField(
+                    obscureText: true,
+                    controller: _passwordController,
+                    decoration: InputDecoration(
+                      labelText: AmLocalizations.of(context).password,
+                      hintText: AmLocalizations.of(context).password,
+                    ),
+                    autovalidate: true,
+                    validator: (_) => state.loginStatus != LoginStatus.passwordChanged || LoginBloc.isPasswordValid(_) ? null : AmLocalizations.of(context).passwordDoesNotMeetRequirements,
+                  ),
+                  Container(margin: EdgeInsets.only(top: 25.0)),
+                  RaisedButton(
+                    onPressed: () => (state.loginStatus != LoginStatus.authenticating) ? BlocProvider.of<LoginBloc>(context).add(LoginButtonPressed(username: _usernameController.text, password: _passwordController.text, ),) : null,
+                    child: Text(AmLocalizations.of(context).login, style: TextStyle(color: Colors.white),),
+                    color: Colors.blue,
+                  )
+                ],
+              ),
             ),
-          ),
-        )
+          )
       ),
     );
   }

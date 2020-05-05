@@ -117,7 +117,7 @@ class UserDao extends DatabaseAccessor<AppDatabase> with _$UserDaoMixin {
 @UseMoor(tables: [BankTransactions, TriviaQuestions, Users], daos: [BankTransactionDao, TriviaQuestionDao, UserDao])
 class AppDatabase extends _$AppDatabase {
 
-  AppDatabase() : super(EncryptedExecutor.inDatabaseFolder(path: 'am.sqlite', password: dbPassword, logStatements: kDebugMode));
+  AppDatabase({QueryExecutor queryExecutor}) : super(queryExecutor);
 
   AppDatabase.connect(DatabaseConnection connection) : super.connect(connection);
 

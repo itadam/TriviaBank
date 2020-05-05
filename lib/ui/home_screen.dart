@@ -22,23 +22,43 @@ import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
 
+  final User user;
+
+  const HomeScreen({Key key, this.user}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _HomeScreenState();
+
 }
 
 class _HomeScreenState extends State<HomeScreen> {
 
+  HomeBloc _homeBloc;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _homeBloc.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    _homeBloc = HomeBloc(
+        user: widget.user,
+        bankTransactionDao: Provider.of<AppDatabase>(context).bankTransactionDao
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(AmLocalizations.of(context).welcome),),
       body: BlocBuilder<HomeBloc, HomeState>(
-        
-        bloc: HomeBloc(
-            user: BlocProvider.of<LoginBloc>(context).user,
-            bankTransactionDao: Provider.of<AppDatabase>(context).bankTransactionDao
-        ),
+
+        bloc: _homeBloc,
 
         builder: (context, state) => Container(
           height: double.maxFinite,
@@ -52,13 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: state.bankBalance?.bankAccountBalanceColor(),
                           height: 120.0, // height of the button
                           width: 120.0, // width of the button
-                          child: Center(child: Text(AmLocalizations.of(context).currentBalanceStringFormat(NumberFormat.simpleCurrency().format(state.bankBalance / 100)), style: TextStyle(color: Colors.white), textAlign: TextAlign.center,)),
+                          child: Center(child: Text(AmLocalizations.of(context).currentBalanceStringFormat(state.bankBalance), style: TextStyle(color: Colors.white), textAlign: TextAlign.center,)),
                         ),
                       )
                   )
               ),
               Visibility(
-                  visible: state.homeStatus == HomeStatus.Initialized || state.homeStatus == HomeStatus.FetchingData,
+                  visible: state.homeStatus == HomeStatus.FetchingData,
                   child: CircularProgressIndicator()
               ),
               new Positioned(
@@ -75,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: new Text(AmLocalizations.of(context).yesWithExclamation),
                                 onPressed: () => Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => TriviaScreen()),
+                                  MaterialPageRoute(builder: (context) => TriviaScreen(user: widget.user, homeState: state,)),
                                 )
                             ),
                             new FlatButton(
@@ -109,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-      )
+      ),
     );
   }
 }

@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:triviabank/bloc/authentication/authentication_event.dart';
@@ -21,10 +23,16 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
       AuthenticationEvent event,
       ) async* {
     if (event is AppStarted) {
-      final bool hasToken = await userRepository.hasToken();
+      //final bool hasToken = await userRepository.hasToken();
+      final userToken = await userRepository.getToken();
 
-      if (hasToken) {
-        yield AuthenticationAuthenticated();
+      if (userToken != null) {
+        var user = User.fromJson(jsonDecode(userToken));
+        if (user == null) {
+          yield AuthenticationUnauthenticated();
+        } else {
+          yield AuthenticationAuthenticated(user: user);
+        }
       } else {
         yield AuthenticationUnauthenticated();
       }

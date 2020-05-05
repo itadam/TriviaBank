@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbol_data_local.dart' as intl;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
 
 import 'package:triviabank/l10n/messages_all.dart';
 
@@ -70,9 +71,11 @@ class AmLocalizations {
 
   String youHaveNumberOfQuestions(int numberOfQuestions) => intl.Intl.message("You have $numberOfQuestions questions below", args: [numberOfQuestions], name: 'youHaveNumberOfQuestions');
 
-  String currentBalanceStringFormat(String balance) => intl.Intl.message("Current balance is: $balance", args: [balance], name: 'currentBalanceStringFormat');
+  String currentBalanceStringFormat(int bankBalanceInPennies) => intl.Intl.message("Current balance is: ${NumberFormat.simpleCurrency().format(bankBalanceInPennies / 100)}", args: [bankBalanceInPennies], name: 'currentBalanceStringFormat');
 
   String get tryToEarnMore => intl.Intl.message('Try to earn More');
+  
+  String wageSelectionAlex(int dollarAmount) => intl.Intl.message('${NumberFormat.simpleCurrency(decimalDigits: 0).format(dollarAmount)}, Alex'.toUpperCase(), args: [dollarAmount], name: 'wageSelectionAlex');
 
   String get welcome => intl.Intl.message('Welcome');
 }

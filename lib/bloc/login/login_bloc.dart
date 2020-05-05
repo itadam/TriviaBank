@@ -26,10 +26,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
   LoginState get initialState => LoginState(loginStatus: LoginStatus.initial);
 
-  User _user;
-
-  User get user => _user;
-
   static bool isValidEmail(String str) {
     final emailRegExp = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
     return emailRegExp.hasMatch(str);
@@ -57,16 +53,17 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       try {
 
-        final token = await userRepository.authenticate(
+        final userResult = await userRepository.authenticate(
           username: event.username,
           password: event.password,
         );
-        _user = User.fromJson(jsonDecode(token));
-        authenticationBloc.add(LoggedIn(token: token));
-        yield state.mergeWith(loginStatus: LoginStatus.successful, isEmailValid: true, isPasswordValid: true);
+        if (userResult == null || userResult.result == null) {
+          throw userResult?.error;
+        }
+        authenticationBloc.add(LoggedIn(user: userResult.result));
+        yield state.mergeWith(loginStatus: LoginStatus.successful, isEmailValid: true, isPasswordValid: true, error: userResult.error, user: userResult.result);
       } catch (error) {
-        _user = null;
-        yield state.mergeWith(loginStatus: LoginStatus.failure, error: error.toString());
+        yield state.mergeWith(loginStatus: LoginStatus.failure, error: error?.toString());
       }
     }
   }
